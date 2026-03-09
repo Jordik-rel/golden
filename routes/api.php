@@ -21,7 +21,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/all/users', function () {
-    return User::with('role.permission')->get();
+    return response()->json([
+        'users'=> User::with('role.permission')->get()
+    ]);
 })->middleware('auth:sanctum');
 
 
