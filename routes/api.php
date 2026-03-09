@@ -20,7 +20,7 @@ Route::get('/user', function (Request $request) {
     return User::with('role')->find($request->user());
 })->middleware('auth:sanctum');
 
-Route::get('/all/user', function () {
+Route::get('/all/users', function () {
     return User::with('role.permissions')->get();
 })->middleware('auth:sanctum');
 
