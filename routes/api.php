@@ -20,6 +20,11 @@ Route::get('/user', function (Request $request) {
     return User::with('role')->find($request->user());
 })->middleware('auth:sanctum');
 
+Route::get('/all/user', function () {
+    return User::with('role.permissions')->get();
+})->middleware('auth:sanctum');
+
+
 Route::prefix('auth')->name('auth.')->group(function(){
     Route::post('login',[AuthController::class, 'login'])->name('login');
     Route::post('register',[AuthController::class, 'register'])->name('register');
