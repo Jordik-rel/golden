@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\MouvementRequest;
+use App\Models\MatierePremiere;
+use App\Models\MouvementStock;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class MouvementController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        return response()->json([
+            'mouvements'=> MouvementStock::with('matiere','user','type','fournisseur')->get()
+        ]);
+    }
+
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(MouvementRequest $request)
+    {
+        $validation = $request->validated();     
+        $matiere = MatierePremiere::where('id','matiere_premiere_id')->first();
+        // $date_planning = Auth::user()->plannings()->whereDate('jour_travail', Carbon::today())->first();
+
+        // if(!$date_planning->isSameDay(Carbon::now())){
+        //     return response()->json([
+        //         'errror'=> 'Vous ne pouvez pas éffectuer d\'action à ce jour'
+        //     ]);
+        // }
+
+        if($validation['type_mouvement'] === 'sortie' && $matiere->quantite < $validation['quantite']){
+            return response()->json([
+                'error' => 'Stock trop limité pour éffectuer ce genre d\'action'
+            ]);
+        }
+
+        $mouvement = MouvementStock::create($validation);
+
+        switch($mouvement->type_mouvement){
+            case 'entree':
+                $matiere->quantite = $matiere->quantite + $mouvement->quantite;
+                $matiere->save();
+                break;
+            case 'sortie':
+                $matiere->quantite = $matiere->quantite - $mouvement->quantite;
+                $matiere->save();
+                break;
+            case 'ajustement':
+                break;
+            default:
+                return 'Echec ';
+        }
+
+        return response()->json([
+            'mouvement'=>$mouvement,
+            'success'=>'Nouveau mouvement éffectué avec succès'
+        ],201);
+        
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(MouvementStock $mouvement)
+    {
+        return response()->json([
+            'mouvement'=> MouvementStock::with('matiere','user','type','fournisseur')->findOrFail($mouvement->id)
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+}

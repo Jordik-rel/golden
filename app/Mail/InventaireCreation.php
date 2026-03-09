@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Mail;
+
+use App\Models\Inventaire;
+use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class InventaireCreation extends Mailable
+{
+    use Queueable, SerializesModels;
+    public $inventaire;
+    public $user;
+
+    /**
+     * Create a new message instance.
+     */
+    public function __construct(Inventaire $inventaire,User $user)
+    {
+        $this->user = $user;
+        $this->inventaire = $inventaire;
+    }
+
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Mail Création d\'inventaire',
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            markdown: 'mail.inventaire.creation',
+            with:[
+                'user'=>$this->user,
+                'inventaire' => $this->inventaire
+             ]
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
+    }
+}
