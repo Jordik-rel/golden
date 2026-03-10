@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+
+    public function index()
+    {
+        return response()->json([
+            'users' => User::with('role')->get()
+        ]);
+    }
+    
     public function register(RegisterRequest $request)
     {
         $validation = $request->validated();
