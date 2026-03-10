@@ -25,7 +25,7 @@ class MouvementStock extends Model
      */
     public function matiere():BelongsTo
     {
-        return $this->belongsTo(MatierePremiere::class, 'matiere_premiere_id');
+        return $this->belongsTo(MatierePremiere::class,'matiere_premiere_id');
     }
 
     /**

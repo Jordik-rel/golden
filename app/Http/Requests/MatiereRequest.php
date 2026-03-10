@@ -26,7 +26,14 @@ class MatiereRequest extends FormRequest
             'unite'=>['required','string','regex:/^(?!.*(.)\1{2,})(?=.*\pL)[\pL\s\.\,\?\'\"\-]{2,}$/u'],
             'seuil_min'=>['required','numeric','min:0','gt:seuil_alerte'],
             'seuil_alerte'=>['required','numeric','min:0'],
-            'quantite'=>['required','numeric','min:0','gt:seuil_min']
+            'quantite'=>['required','numeric','min:0']  //,'gt:seuil_min'
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        return $this->merge([
+            'quantite' => 0
+        ]);
     }
 }

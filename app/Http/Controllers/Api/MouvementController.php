@@ -6,12 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MouvementRequest;
 use App\Models\MatierePremiere;
 use App\Models\MouvementStock;
+use App\Services\QuantityServices;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MouvementController extends Controller
 {
+
+    //  QuantityServices $quantities;
+    public function __construct(public QuantityServices $quantities)
+    {
+        // $this->quantities = $quantities;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -29,7 +37,7 @@ class MouvementController extends Controller
     public function store(MouvementRequest $request)
     {
         $validation = $request->validated();     
-        $matiere = MatierePremiere::where('id','matiere_premiere_id')->first();
+        $matiere = MatierePremiere::where('id',$validation['matiere_premiere_id'])->first();
         // $date_planning = Auth::user()->plannings()->whereDate('jour_travail', Carbon::today())->first();
 
         // if(!$date_planning->isSameDay(Carbon::now())){
@@ -46,22 +54,13 @@ class MouvementController extends Controller
 
         $mouvement = MouvementStock::create($validation);
 
-        switch($mouvement->type_mouvement){
-            case 'entree':
-                $matiere->quantite = $matiere->quantite + $mouvement->quantite;
-                $matiere->save();
-                break;
-            case 'sortie':
-                $matiere->quantite = $matiere->quantite - $mouvement->quantite;
-                $matiere->save();
-                break;
-            default:
-                return 'Echec ';
-        }
+        // calcul_quantite($matiere);
+        $new_stock = $this->quantities->calcul_quantite($matiere);
 
         return response()->json([
             'mouvement'=>$mouvement,
-            'success'=>'Nouveau mouvement éffectué avec succès'
+            'success'=>'Nouveau mouvement éffectué avec succès',
+            'stock'=>$new_stock
         ],201);
         
     }

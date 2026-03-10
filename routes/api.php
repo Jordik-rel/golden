@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum','verified'])->prefix('preface/')->group(functi
     Route::resource('users', AuthController::class)->except(['create', 'edit']);
     Route::put('inventaire/{inventaire}/start',[InventaireController::class,'start']);
     Route::put('inventaire/{inventaire}/end',[InventaireController::class,'end_inventaire']);
+    Route::get('quantity/{matiere}',[InventaireController::class, 'calcul_quantite']);
 
     Route::resource('role',RoleController::class)->except(['create','edit']);
     Route::resource('permission',PermissionController::class)->except(['create','edit']);

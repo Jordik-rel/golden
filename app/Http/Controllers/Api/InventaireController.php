@@ -9,16 +9,21 @@ use App\Models\DetailInventaire;
 use App\Models\Inventaire;
 use App\Models\MatierePremiere;
 use App\Models\MouvementStock;
-use App\Models\User;
+use App\Services\QuantityServices;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Validation\Rule;
 
 class InventaireController extends Controller
 {
+
+    protected QuantityServices $quantities;
+    public function __construct(QuantityServices $quantities)
+    {
+        $this->quantities = $quantities;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -98,12 +103,15 @@ class InventaireController extends Controller
                         'user_id'=> Auth::id(),
                         'type_mouvement'=> 'ajustement',
                         'libelle_mouvement' => 'Ajustement de l\'écart pour la matiere '.$matiere->libelle_matiere,
-                        'quantite' => $detail->stock_reel
+                        'quantite' => $detail->ecart
                     ];
                     $mouvement = new MouvementStock($data);
                     $mouvement->save();
-                    $matiere->quantite = $mouvement->quantite;
-                    $matiere->save();
+
+                    $new_stock = $this->quantities->calcul_quantite($matiere);
+
+                    // $matiere->quantite = $mouvement->quantite;
+                    // $matiere->save();
                 }
             }
         }
@@ -114,7 +122,8 @@ class InventaireController extends Controller
         ]);
 
         return response()->json([
-            'success' => 'Inventaire achevé avec succès'
+            'success' => 'Inventaire achevé avec succès',
+            'stock'=>$new_stock
         ]);
     }
 
@@ -192,4 +201,6 @@ class InventaireController extends Controller
             ],500);
         }
     }
+
+    
 }

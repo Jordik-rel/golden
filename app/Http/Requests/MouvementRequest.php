@@ -40,8 +40,21 @@ class MouvementRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+        $matiere = MatierePremiere::find($this->matiere_premiere_id);
         return $this->merge([
-            'user_id'=>Auth::id()
+            'user_id'=>Auth::id(),
+            'libelle_mouvement' => $this->mouvement_selected_message($this->type_mouvement).' de la matière première '.$matiere->libelle_matiere.' par '.Auth::user()->nom.' '.Auth::user()->prenom
         ]);
+    }
+
+    protected function mouvement_selected_message(String $mouvemnt)
+    {
+        if($mouvemnt === 'sortie'){
+            return 'Sortie';
+        }elseif($mouvemnt === 'entree'){
+            return 'Entrée';
+        }else{
+            return 'Ajustement';
+        }
     }
 }
