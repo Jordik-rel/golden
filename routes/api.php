@@ -34,6 +34,7 @@ Route::prefix('auth')->name('auth.')->group(function(){
 });
 
 Route::middleware(['auth:sanctum','verified'])->prefix('preface/')->group(function(){
+    Route::resource('users', AuthController::class)->except(['create', 'edit']);
     Route::put('inventaire/{inventaire}/start',[InventaireController::class,'start']);
     Route::put('inventaire/{inventaire}/end',[InventaireController::class,'end_inventaire']);
 
