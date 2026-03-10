@@ -62,7 +62,7 @@ class TypeProductionController extends Controller
         try{
             $type->update($data);
             return response()->json([
-                'fournisseur'=>$type,
+                'type'=>$type,
                 'success'=>' Informations type de production mise à jour avec succès'
             ],201);
         }catch(Exception $e){
@@ -80,7 +80,7 @@ class TypeProductionController extends Controller
     {
         if($type->mouvements()->count() > 0 || $type->productions()->count() > 0){
             return response()->json([
-                'error' => 'Impossible de supprimer le fournisseur car déjà attribuée.'
+                'error' => 'Impossible de supprimer le type de production car déjà attribuée.'
             ], 400);
         }
 
