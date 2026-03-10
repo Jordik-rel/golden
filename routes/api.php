@@ -14,10 +14,11 @@ use App\Models\Permission;
 use App\Models\TypeProduction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
-    return User::with('role')->find($request->user());
+    return User::with('role')->find(Auth::id());
 })->middleware('auth:sanctum');
 
 Route::get('/all/users', function (Request $request) {
