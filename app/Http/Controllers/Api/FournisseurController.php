@@ -26,7 +26,8 @@ class FournisseurController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'libelle_fournisseur'=>['required','string','regex:/^(?!.*(.)\1{2,})(?=.*\pL)[\pL\s\.\,\?\'\"\-]{2,}$/u']
+            'libelle_fournisseur'=>['required','string','regex:/^(?!.*(.)\1{2,})(?=.*\pL)[\pL\s\.\,\?\'\"\-]{2,}$/u'],
+            'telephone'=>['required','size:10','string']
         ]);
         try{
             $fournisseur = Fournisseur::create($data);
@@ -58,7 +59,8 @@ class FournisseurController extends Controller
     public function update(Request $request, Fournisseur $fournisseur)
     {
         $data = $request->validate([
-            'libelle_fournisseur'=>['required','string','regex:/^(?!.*(.)\1{2,})(?=.*\pL)[\pL\s\.\,\?\'\"\-]{2,}$/u']
+            'libelle_fournisseur'=>['required','string','regex:/^(?!.*(.)\1{2,})(?=.*\pL)[\pL\s\.\,\?\'\"\-]{2,}$/u'],
+            'telephone'=>['required','size:10','string']
         ]);
         try{
             $fournisseur->update($data);

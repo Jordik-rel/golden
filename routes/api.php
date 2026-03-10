@@ -20,12 +20,11 @@ Route::get('/user', function (Request $request) {
     return User::with('role')->find($request->user());
 })->middleware('auth:sanctum');
 
-Route::get('/all/users', function () {
+Route::get('/all/users', function (Request $request) {
     return response()->json([
-        'users'=> User::with('role.permission')->get()
+        'users' => User::with('role.permission')->get()
     ]);
 })->middleware('auth:sanctum');
-
 
 Route::prefix('auth')->name('auth.')->group(function(){
     Route::post('login',[AuthController::class, 'login'])->name('login');
@@ -35,6 +34,7 @@ Route::prefix('auth')->name('auth.')->group(function(){
 
 Route::middleware(['auth:sanctum','verified'])->prefix('preface/')->group(function(){
     Route::put('inventaire/{inventaire}/start',[InventaireController::class,'start']);
+    Route::put('inventaire/{inventaire}/end',[InventaireController::class,'end_inventaire']);
 
     Route::resource('role',RoleController::class)->except(['create','edit']);
     Route::resource('permission',PermissionController::class)->except(['create','edit']);

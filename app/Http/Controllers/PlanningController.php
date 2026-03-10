@@ -70,9 +70,17 @@ class PlanningController extends Controller
     {
         $data = $request->validate([
             'user_id' => ['required',Rule::exists(User::class,'id')],
-            'jour_travail' => ['required', 'string', 'in:Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche',Rule::unique(Planning::class,'id')],
+            'jour_travail' => ['required', 'string', 'in:Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche'],
         ]);
-        $user = User::findOrFail('user_id');
+
+        $user = User::findOrFail($data['user_id']);
+
+        // $old = Planning::where('jour_travail', $data['jour_travail'])
+        //     ->where('id', '!=', $planning->id)
+        //     ->update(['jour_travail' => null]);
+
+        // dd($old);
+
         try{
             $planning->update($data);
             Mail::to($user->email)->send(new PlanningMail($planning));

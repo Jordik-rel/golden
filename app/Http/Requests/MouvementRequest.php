@@ -33,7 +33,7 @@ class MouvementRequest extends FormRequest
             'type_production_id'=>['nullable',Rule::exists(TypeProduction::class,'id')],
             'type_mouvement'=>['required','string'],
             'libelle_mouvement'=>['required','string'],
-            'fournisseur_id'=>['required',Rule::exists(Fournisseur::class,'id')],
+            'fournisseur_id'=>['nullable',Rule::exists(Fournisseur::class,'id')],
             'quantite'=>['required','min:1','numeric']
         ];
     }

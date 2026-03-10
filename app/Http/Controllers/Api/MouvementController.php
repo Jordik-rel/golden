@@ -55,8 +55,6 @@ class MouvementController extends Controller
                 $matiere->quantite = $matiere->quantite - $mouvement->quantite;
                 $matiere->save();
                 break;
-            case 'ajustement':
-                break;
             default:
                 return 'Echec ';
         }

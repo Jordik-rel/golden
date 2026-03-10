@@ -11,7 +11,8 @@ class Fournisseur extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'libelle_fournisseur'
+        'libelle_fournisseur',
+        'telephone'
     ];
 
 

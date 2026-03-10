@@ -81,29 +81,36 @@ class InventaireController extends Controller
 
     public function end_inventaire(Inventaire $inventaire)
     {
+        if(in_array($inventaire->etat, ['en_attente', 'terminé', 'annulé'])){
+            return response()->json([
+                'error'=> 'Impossible de mettre fin à cet inventaire car son état à changer'
+            ]);
+        } 
+
         $details = DetailInventaire::where('inventaire_id',$inventaire->id)->get();
 
         if($inventaire->avec_correction_stock){
             foreach($details as $detail){
-                if($detail->ecart >= 0 || $detail->ecart <= 0){
+                if($detail->ecart != 0){
                     $matiere = MatierePremiere::findOrFail($detail->matiere_premiere_id);
                     $data = [
                         'matiere_premiere_id' => $matiere->id,
                         'user_id'=> Auth::id(),
                         'type_mouvement'=> 'ajustement',
                         'libelle_mouvement' => 'Ajustement de l\'écart pour la matiere '.$matiere->libelle_matiere,
-                        'fournisseur_id',
-                        'quantite'
+                        'quantite' => $detail->stock_reel
                     ];
-                    $mouvement = new MouvementStock();
-                    $matiere->quantite = $detail->stock_reel;
+                    $mouvement = new MouvementStock($data);
+                    $mouvement->save();
+                    $matiere->quantite = $mouvement->quantite;
                     $matiere->save();
                 }
             }
         }
 
         $inventaire->update([
-            'etat' => 'terminé'
+            'etat' => 'terminé',
+            'date_fin' => now()
         ]);
 
         return response()->json([

@@ -29,9 +29,10 @@ class DatabaseSeeder extends Seeder
         //     'tel'=> '0123456789'
         // ]);
 
+        // MatiereSeeder::class,
+        // TypeProductionSeeder::class,
         $this->call([
-            MatiereSeeder::class,
-            TypeProductionSeeder::class
+            FournisseurSeeder::class
         ]);
 
     }
