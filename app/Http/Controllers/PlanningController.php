@@ -31,7 +31,7 @@ class PlanningController extends Controller
     {
         $data = $request->validate([
             'user_id' => ['required',Rule::exists(User::class,'id'),],
-            'jour_travail' => ['required', 'string', 'in:Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche',Rule::unique(Planning::class,'jour_travail')],
+            'jour_travail' => ['required', 'string', 'in:Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche',Rule::unique(Planning::class,'jour_travail')->where('user_id', $request->user_id)],
         ]);
 
         $user = User::findOrFail($data['user_id']);
