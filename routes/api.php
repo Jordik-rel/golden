@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TypeProductionController;
+use App\Http\Controllers\ProductionJournaliereController;
 use App\Models\Permission;
 use App\Models\TypeProduction;
 use App\Models\User;
@@ -38,7 +39,7 @@ Route::middleware(['auth:sanctum','verified'])->prefix('preface/')->group(functi
     Route::put('inventaire/{inventaire}/start',[InventaireController::class,'start']);
     Route::put('inventaire/{inventaire}/end',[InventaireController::class,'end_inventaire']);
     Route::get('quantity/{matiere}',[InventaireController::class, 'calcul_quantite']);
-
+    
     Route::resource('role',RoleController::class)->except(['create','edit']);
     Route::resource('permission',PermissionController::class)->except(['create','edit']);
     Route::resource('fournisseur',FournisseurController::class)->except(['create','edit']);
@@ -48,4 +49,5 @@ Route::middleware(['auth:sanctum','verified'])->prefix('preface/')->group(functi
     Route::resource('mouvement',MouvementController::class)->except(['create','edit']);
     Route::resource('inventaire',InventaireController::class)->except(['create','edit']);
     Route::resource('inventaire/{inventaire}/details',DetailInventaireController::class)->except(['create','edit']);
+    Route::resource('rapport',ProductionJournaliereController::class)->except(['create','edit']);
 });

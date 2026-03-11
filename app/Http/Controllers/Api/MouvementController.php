@@ -75,6 +75,10 @@ class MouvementController extends Controller
         ]);
     }
 
+    public function get_mouvement_by_date(Request $request){
+        
+    } 
+
     /**
      * Update the specified resource in storage.
      */

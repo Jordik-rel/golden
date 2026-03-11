@@ -27,6 +27,6 @@ class ProductionJournaliere extends Model
 
     public function type():BelongsTo
     {
-        return $this->belongsTo(TypeProduction::class);
+        return $this->belongsTo(TypeProduction::class,'type_production_id');
     }
 }
