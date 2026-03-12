@@ -26,8 +26,16 @@ class Role extends Model
     /**
      * A un role, on associe une ou plusieurs permissions
      */
-    public function permission():BelongsToMany
+    public function permission(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class);
+    }
+
+    /**
+     *  Vérification des acces du role
+     */
+    public function hasPermission(string $permissionName): bool
+    {
+        return $this->permission->contains('liste_permission', $permissionName);
     }
 }

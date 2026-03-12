@@ -98,4 +98,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(ProductionJournaliere::class);
     }
+
+    /**
+     * Vérifie si l'utilisateur dispose de la permission
+     */
+    public function hasPermission(string $permissionName): bool 
+    {
+        return $this->role?->hasPermission($permissionName) ?? false;
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckPermissionMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,12 +15,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
-       $middleware->api(prepend: [
+        $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
         $middleware->appendToGroup('api', [
             \Illuminate\Session\Middleware\StartSession::class, 
+        ]);
+
+        $middleware->alias([
+            'permission' => CheckPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
