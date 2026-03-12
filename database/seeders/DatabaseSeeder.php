@@ -19,21 +19,21 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class
         ]);
-            
+
         User::factory(10)->create();
         User::factory()->create([
             'nom' => 'Test User',
             'prenom' => 'User',
             'email' => 'test@example.com',
             'role_id' => 1,
-            'tel'=> '0123456789'
+            'tel' => '0123456789'
         ]);
 
         $this->call([
             MatiereSeeder::class,
             TypeProductionSeeder::class,
-            FournisseurSeeder::class
+            FournisseurSeeder::class,
+            MouvementSeeder::class,
         ]);
-
     }
 }

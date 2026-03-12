@@ -15,22 +15,34 @@ class PermissionSeeder extends Seeder
     {
         DB::table('permissions')->insert([
             [
+                'liste_permission' => 'Gerer matiere'
+            ],
+            [
+                'liste_permission' => 'Gerer fournisseur'
+            ],
+            [
+                'liste_permission' => 'Gerer mouvement'
+            ],
+            [
+                'liste_permission' => 'Gerer production'
+            ],
+            [
+                'liste_permission' => 'Gerer inventaire'
+            ],
+            [
+                'liste_permission' => 'Gerer planning'
+            ],
+            [
+                'liste_permission' => 'Gerer rapport'
+            ],
+            [
+                'liste_permission' => 'Gerer utilisateurs'
+            ],
+            [
+                'liste_permission' => 'Gerer role'
+            ],
+            [
                 'liste_permission' => 'acceder parametre'
-            ],
-            [
-                'liste_permission' => 'lancer inventaire'
-            ],
-            [
-                'liste_permission' => 'créer matiere'
-            ],
-            [
-                'liste_permission' => 'créer planning'
-            ],
-            [
-                'liste_permission' => 'créer inventaire'
-            ],
-            [
-                'liste_permission' => 'remplir production journaliere'
             ],
         ]);
     }

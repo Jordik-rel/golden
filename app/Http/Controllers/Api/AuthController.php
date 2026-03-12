@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use App\Mail\RegisterMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -20,43 +22,41 @@ class AuthController extends Controller
             'users' => User::with('role')->get()
         ]);
     }
-    
+
     public function register(RegisterRequest $request)
     {
         $validation = $request->validated();
-
-        $validation['password'] = Hash::make($validation['password']);
+        $password =  $validation['password'];
+        $validation['password'] = Hash::make($password);
 
         $user = User::create($validation);
 
-        event(new Registered($user));
-
-        Auth::login($user);
+        Mail::to($user)->send(new RegisterMail($user,$password));
 
         return response()->json([
-            'user'=> Auth::user()
+            'user' => $user
         ]);
     }
 
 
     public function login(Request $request)
     {
-         $credentials = $request->validate([
-            'email'=>'required|email',
-            'password'=>'required|string'
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string'
         ]);
-        
-        if(Auth::attempt($credentials)){
-            $request->session()->regenerate();  
-            logger([
-                'session_id' => session()->getId(),
-                'user'       => Auth::id(),
-                'guard'      => Auth::getDefaultDriver(),
-            ]);          
-            return response()->json(['success'=>true,'user'=>Auth::user()]);
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            // logger([
+            //     'session_id' => session()->getId(),
+            //     'user'       => Auth::id(),
+            //     'guard'      => Auth::getDefaultDriver(),
+            // ]);
+            return response()->json(['success' => true, 'user' => Auth::user()]);
         }
         throw ValidationException::withMessages([
-            'error'=>'Email ou Mot de passe incorrect'
+            'error' => 'Email ou Mot de passe incorrect'
         ]);
     }
 
@@ -65,6 +65,6 @@ class AuthController extends Controller
         Auth::guard('web')->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
-        return response()->json(['succes'=>'Déconnexion réussi avec succès']);
+        return response()->json(['succes' => 'Déconnexion réussi avec succès']);
     }
 }
