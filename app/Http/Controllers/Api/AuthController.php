@@ -48,11 +48,6 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            // logger([
-            //     'session_id' => session()->getId(),
-            //     'user'       => Auth::id(),
-            //     'guard'      => Auth::getDefaultDriver(),
-            // ]);
             return response()->json(['success' => true, 'user' => Auth::user()]);
         }
         throw ValidationException::withMessages([

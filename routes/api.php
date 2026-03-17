@@ -11,8 +11,6 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TypeProductionController;
 use App\Http\Controllers\ProductionJournaliereController;
-use App\Models\Permission;
-use App\Models\TypeProduction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,11 +32,12 @@ Route::prefix('auth')->name('auth.')->group(function(){
     Route::post('logout',[AuthController::class,'logout'])->name('logout')->middleware(['auth:sanctum','verified','status:completed']);
 });
 
-Route::middleware(['auth:sanctum','verified'])->prefix('preface/')->group(function(){
+Route::middleware(['auth:sanctum'])->prefix('preface/')->group(function(){
     Route::resource('users', AuthController::class)->except(['create', 'edit']);
     Route::put('inventaire/{inventaire}/start',[InventaireController::class,'start']);
     Route::put('inventaire/{inventaire}/end',[InventaireController::class,'end_inventaire']);
     Route::get('quantity/{matiere}',[InventaireController::class, 'calcul_quantite']);
+    Route::get('types-by-date',[TypeProductionController::class, 'get_type_by_date']);
     
     Route::resource('role',RoleController::class)->except(['create','edit']);
     Route::resource('permission',PermissionController::class)->except(['create','edit']);
@@ -51,3 +50,5 @@ Route::middleware(['auth:sanctum','verified'])->prefix('preface/')->group(functi
     Route::resource('inventaire/{inventaire}/details',DetailInventaireController::class)->except(['create','edit']);
     Route::resource('rapport',ProductionJournaliereController::class)->except(['create','edit']);
 });
+
+

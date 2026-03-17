@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\TypeProduction;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 
 class TypeProductionController extends Controller
 {
@@ -47,6 +49,24 @@ class TypeProductionController extends Controller
     {
         return response()->json([
             'type'=>TypeProduction::with('mouvements','productions')->withCount('mouvements','productions')->findOrFail($type->id)
+        ]);
+    }
+
+    /**
+     * Donner les type de production en fonction de la date mais accompagné des mouvements de type sortie  
+     */
+    public function get_type_by_date(Request $request)
+    {
+        $validation = $request->validate([
+            'date'=> ['required','date']
+        ]);
+
+        $types = TypeProduction::with(['mouvements'=> function ($query){
+            $query->where('type_mouvement','sortie');
+        }])->whereDate('created_at',Carbon::parse($validation['date'])->format('Y-m-d'))->get();
+
+        return response()->json([
+            'types'=>$types
         ]);
     }
 
