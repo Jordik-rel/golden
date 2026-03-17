@@ -58,12 +58,12 @@ class TypeProductionController extends Controller
     public function get_type_by_date(Request $request)
     {
         $validation = $request->validate([
-            'date'=> ['required','date']
+            'date_production'=> ['required','date']
         ]);
 
         $types = TypeProduction::with(['mouvements'=> function ($query){
             $query->where('type_mouvement','sortie');
-        }])->whereDate('created_at',Carbon::parse($validation['date'])->format('Y-m-d'))->get();
+        }])->whereDate('created_at',Carbon::parse($validation['date_production'])->format('Y-m-d'))->get();
 
         return response()->json([
             'types'=>$types
