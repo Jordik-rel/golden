@@ -27,9 +27,13 @@ class ProductionJournaliereRequest extends FormRequest
     {
         return [
             'user_id' => ['required',Rule::exists(User::class,'id')],
-            'type_production_id' => ['required',Rule::exists(TypeProduction::class,'id')],
             'date_production' => ['required','date','after_or_equal:' . now()->subDays(2)->toDateString(),'before_or_equal:' . now()->toDateString()],
-            'quantite' => ['required','numeric'],
+            // 'productions' => ['required','array'],
+            // 'type_production_id' => ['required',Rule::exists(TypeProduction::class,'id')],
+            // 'quantite' => ['required','numeric'],
+            'productions' => ['required', 'array', 'min:1'],
+            'productions.*.type_production_id' => ['required',Rule::exists(TypeProduction::class, 'id')],
+            'productions.*.quantite' => ['required', 'numeric', 'min:0'],
         ];
     }
 

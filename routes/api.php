@@ -38,6 +38,8 @@ Route::middleware(['auth:sanctum'])->prefix('preface/')->group(function(){
     Route::put('inventaire/{inventaire}/end',[InventaireController::class,'end_inventaire']);
     Route::get('quantity/{matiere}',[InventaireController::class, 'calcul_quantite']);
     Route::get('types-by-date',[TypeProductionController::class, 'get_type_by_date']);
+    Route::get('rapport',[ProductionJournaliereController::class, 'index']);
+    Route::post('rapport/bulk',[ProductionJournaliereController::class, 'store']);
     
     Route::resource('role',RoleController::class)->except(['create','edit']);
     Route::resource('permission',PermissionController::class)->except(['create','edit']);
@@ -48,7 +50,7 @@ Route::middleware(['auth:sanctum'])->prefix('preface/')->group(function(){
     Route::resource('mouvement',MouvementController::class)->except(['create','edit']);
     Route::resource('inventaire',InventaireController::class)->except(['create','edit']);
     Route::resource('inventaire/{inventaire}/details',DetailInventaireController::class)->except(['create','edit']);
-    Route::resource('rapport',ProductionJournaliereController::class)->except(['create','edit']);
+    // Route::resource('rapport',ProductionJournaliereController::class)->except(['create','edit']);
 });
 
 
