@@ -22,6 +22,16 @@ return [
         // Sanctum::currentRequestHost(),
     ))),
 
+//     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', implode(',', [
+//     'localhost',
+//     'localhost:3000',
+//     'localhost:4200',
+//     '10.0.2.2',
+//     '10.0.2.2:8000',
+//     '127.0.0.1',
+//     '127.0.0.1:8000',
+// ]))),
+
     /*
     |--------------------------------------------------------------------------
     | Sanctum Guards

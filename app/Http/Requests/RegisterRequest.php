@@ -40,7 +40,7 @@ class RegisterRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'password' => Str::random(9) . '!'
+            'password' => Str::random(9) . '!1'
         ]);
     }
 }
