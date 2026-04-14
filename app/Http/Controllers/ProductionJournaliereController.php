@@ -21,56 +21,118 @@ class ProductionJournaliereController extends Controller
         ]);
     }
 
+    // public function store(ProductionJournaliereRequest $request)
+    // {
+    //     $data = $request->validated();
+    //     $done_off = [];
+    //     $done_on = [];
+    //     foreach($data['productions'] as $production){
+    //         $day_production_type = ProductionJournaliere::where('user_id', Auth::id())->where('type_production_id',$production['type_production_id'])->whereDate('date_production',$data['date_production'])->count();
+    //         if($day_production_type >= 2){
+    //             // return response()->json([
+    //             //     'error' => 'Vous avez atteint votre cota de rapport pour la journée'
+    //             // ],422);
+    //             $done_off[] = $production;
+    //             continue;
+    //         }
+
+    //         $daily_production = ProductionJournaliere::create([
+    //             'user_id' => $data['user_id'],
+    //             'date_production'=> $data['date_production'],
+    //             'type_production_id' => $production['type_production_id'],
+    //             'quantite' => $production['quantite']
+    //         ]);
+
+    //         $done_on[] = $daily_production; 
+            
+    //     }
+
+    //     $this->generate_pdf($data['date_production']);
+
+    //     return response()->json([
+    //         'success' => 'Golden Stock vous remercie pour le travail de ce jour',
+    //         'production'=> $done_on
+    //     ]);
+    // }
+
     public function store(ProductionJournaliereRequest $request)
     {
         $data = $request->validated();
-        $done_off = [];
         $done_on = [];
-        foreach($data['productions'] as $production){
-            $day_production_type = ProductionJournaliere::where('user_id', Auth::id())->where('type_production_id',$production['type_production_id'])->whereDate('date_production',$data['date_production'])->count();
-            if($day_production_type >= 2){
-                // return response()->json([
-                //     'error' => 'Vous avez atteint votre cota de rapport pour la journée'
-                // ],422);
+        $done_off = [];
+
+        foreach ($data['productions'] as $production) {
+            $count = ProductionJournaliere::where('user_id', Auth::id())
+                ->where('type_production_id', $production['type_production_id'])
+                ->whereDate('date_production', $data['date_production'])
+                ->count();
+
+            if ($count >= 2) {
                 $done_off[] = $production;
                 continue;
             }
 
-            $daily_production = ProductionJournaliere::create([
-                'user_id' => $data['user_id'],
-                'date_production'=> $data['date_production'],
+            $done_on[] = ProductionJournaliere::create([
+                'user_id'            => $data['user_id'],
+                'date_production'    => $data['date_production'],
                 'type_production_id' => $production['type_production_id'],
-                'quantite' => $production['quantite']
+                'quantite'           => $production['quantite'],
             ]);
-
-            $done_on[] = $daily_production; 
-            
         }
 
-        $this->generate_pdf($data['date_production']);
+        $filename = $this->generate_pdf($data['date_production']);
 
         return response()->json([
-            'success' => 'Golden Stock vous remercie pour le travail de ce jour',
-            'production'=> $done_on
+            'success'    => 'Golden Stock vous remercie pour le travail de ce jour',
+            'production' => $done_on,
+            'pdf_url'    => asset('storage/rapports/' . $filename),
         ]);
     }
 
-    public function generate_pdf(string $day)
-    {
-        $productions = ProductionJournaliere::with('type.mouvements.matiere')->where('user_id',Auth::id())->where('date_production',$day)->get();
+    // public function generate_pdf(string $day)
+    // {
+    //     $productions = ProductionJournaliere::with('type.mouvements.matiere')->where('user_id',Auth::id())->where('date_production',$day)->get();
 
-        $pdf = $pdf = Pdf::loadView('rapport', [
-            'productions' => $productions,
-            'generate_date' => now()->format('d/m/Y H:i'),
-            'date_production' => $day
+    //     $pdf = $pdf = Pdf::loadView('rapport', [
+    //         'productions' => $productions,
+    //         'generate_date' => now()->format('d/m/Y H:i'),
+    //         'date_production' => $day
+    //     ])->setOptions([
+    //         'defaultFont'   => 'DejaVu Sans',
+    //         'isRemoteEnabled' => true,
+    //         'isHtml5ParserEnabled' => true,
+    //     ]);
+
+    //     // $filename = 'rapport_production_' . now() . '_' . Auth::id() . '.pdf';
+
+    //     // return $pdf->download($filename);
+    //     $pdf->save(storage_path('app/public/rapports/' . $filename));
+
+    //     return $filename;
+    // }
+
+    public function generate_pdf(string $day): string
+    {
+        $productions = ProductionJournaliere::with('type.mouvements.matiere')
+            ->where('user_id', Auth::id())
+            ->where('date_production', $day)
+            ->get();
+
+        $filename = 'rapport_production_' . now()->format('Y-m-d_H-i-s') . '_' . Auth::id() . '.pdf';
+
+        $pdf = Pdf::loadView('rapport', [
+            'productions'    => $productions,
+            'generate_date'  => now()->format('d/m/Y H:i'),
+            'date_production' => $day,
         ])->setOptions([
-            'defaultFont'   => 'DejaVu Sans',
-            'isRemoteEnabled' => true,
+            'defaultFont'          => 'DejaVu Sans',
+            'isRemoteEnabled'      => true,
             'isHtml5ParserEnabled' => true,
         ]);
 
-        $filename = 'rapport_production_' . now() . '_' . Auth::id() . '.pdf';
+        $pdf->save(storage_path('app/public/rapports/' . $filename));
 
-        return $pdf->download($filename);
+        return $filename;
     }
+
 }
