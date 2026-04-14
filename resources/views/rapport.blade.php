@@ -153,7 +153,7 @@
             <tr>
                 <td>{{ auth()->user()->prenom }} {{ auth()->user()->nom }}</td>
                 <td>
-                    {{ \Carbon\Carbon::parse($productions->first()?->date_production ?? now())->translatedFormat('d F Y') }}
+                    {{ \Carbon\Carbon::parse($date_production)->translatedFormat('d F Y') }}
                 </td>
                 <td>{{ now()->format('H:i') }}</td>
                 <td><span class="validated">✔ Validé</span></td>
@@ -164,9 +164,9 @@
     {{-- ── UNE SECTION PAR PRODUCTION ────────────────────────────── --}}
     @php $totalGlobal = 0; @endphp
 
+        {{-- Filtrer uniquement les mouvements de type 'sortie' --}}
     @foreach($productions as $production)
         @php
-            {{-- Filtrer uniquement les mouvements de type 'sortie' --}}
             $sorties = $production->type->mouvements
                 ->where('type_mouvement', 'sortie');
 

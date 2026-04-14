@@ -47,6 +47,8 @@ class ProductionJournaliereController extends Controller
             
         }
 
+        $this->generate_pdf($data['date_production']);
+
         return response()->json([
             'success' => 'Golden Stock vous remercie pour le travail de ce jour',
             'production'=> $done_on
@@ -57,9 +59,10 @@ class ProductionJournaliereController extends Controller
     {
         $productions = ProductionJournaliere::with('type.mouvements.matiere')->where('user_id',Auth::id())->where('date_production',$day)->get();
 
-        $pdf = Pdf::loadView('rapport',[
-            'productions'=>$productions,
-            'generate_date'=> now()->format('d/m/Y H:i')
+        $pdf = $pdf = Pdf::loadView('rapport', [
+            'productions' => $productions,
+            'generate_date' => now()->format('d/m/Y H:i'),
+            'date_production' => $day
         ])->setOptions([
             'defaultFont'   => 'DejaVu Sans',
             'isRemoteEnabled' => true,
