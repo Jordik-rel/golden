@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum'])->prefix('preface/')->group(function(){
     Route::get('types-by-date',[TypeProductionController::class, 'get_type_by_date']);
     Route::get('rapport',[ProductionJournaliereController::class, 'index']);
     Route::post('rapport/bulk',[ProductionJournaliereController::class, 'store']);
+    Route::get('pdf/{date}',[ProductionJournaliereController::class, 'generate_pdf']);
     
     Route::resource('role',RoleController::class)->except(['create','edit']);
     Route::resource('permission',PermissionController::class)->except(['create','edit']);

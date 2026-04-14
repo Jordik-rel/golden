@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MouvementRequest;
 use App\Models\MatierePremiere;
 use App\Models\MouvementStock;
+use App\Models\User;
+use App\Notifications\StockAlertNotification;
 use App\Services\QuantityServices;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -57,6 +59,13 @@ class MouvementController extends Controller
         // calcul_quantite($matiere);
         $new_stock = $this->quantities->calcul_quantite($matiere);
 
+        if ($request->type_mouvement === 'sortie') {
+            $matiere = MatierePremiere::find($request->matiere_premiere_id);
+ 
+            // Vérification immédiate après la sortie
+            $this->checkAndNotify($matiere);
+        }
+
         return response()->json([
             'mouvement'=>$mouvement,
             'success'=>'Nouveau mouvement éffectué avec succès',
@@ -73,6 +82,32 @@ class MouvementController extends Controller
         return response()->json([
             'mouvement'=> MouvementStock::with('matiere','user','type','fournisseur')->findOrFail($mouvement->id)
         ]);
+    }
+
+    private function checkAndNotify(MatierePremiere $matiere): void
+    {
+        $estSousSeuilAlerte   = $matiere->quantite <= $matiere->seuil_alerte;
+        $estSousSeuilCritique = $matiere->quantite <= $matiere->seuil_min;
+ 
+        if (!$estSousSeuilAlerte && !$estSousSeuilCritique) {
+            return; // Stock OK, rien à faire
+        }
+ 
+        $admins = User::whereHas('role', function ($p) {
+            $p->where('libelle_role', 'administrateur');
+        })->get();
+ 
+        foreach ($admins as $admin) {
+            $dejaNotifie = $admin->notifications()
+                ->whereDate('created_at', today())
+                ->where('type', StockAlertNotification::class)
+                ->whereJsonContains('data->matiere_id', $matiere->id)
+                ->exists();
+ 
+            if (!$dejaNotifie) {
+                $admin->notify(new StockAlertNotification($matiere));
+            }
+        }
     }
 
     public function get_mouvement_by_date(Request $request){

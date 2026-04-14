@@ -8,7 +8,12 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\TypeProduction;
 use App\Http\Requests\ProductionJournaliereRequest;
+use App\Mail\ProductionJournaliere as MailProductionJournaliere;
+use App\Mail\ProductionJournaliereMail;
+use App\Models\MouvementStock;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 use function Symfony\Component\Clock\now;
@@ -83,6 +88,35 @@ class ProductionJournaliereController extends Controller
 
         $filename = $this->generate_pdf($data['date_production']);
 
+       $admins = User::whereHas('role', function ($p) {
+            $p->where('libelle_role', 'administrateur');
+        })->get();
+
+        $superviseur = trim(
+            (Auth::user()->prenom ?? '') . ' ' . (Auth::user()->nom ?? '')
+        ) ?: (Auth::user()->name ?? 'Superviseur');
+
+        if (!empty($done_on)) {
+            foreach ($admins as $admin) {
+                // Mail::to($admin->email)->send(
+                //     new ProductionJournaliereMail(
+                //         collect($done_on),
+                //         $data['date_production'],
+                //         $filename,
+                //         Auth::user()->nom.' - '.Auth::user()->prenom
+                //     )
+                // );
+                Mail::to(Auth::user()->email)->send(
+                    new ProductionJournaliereMail(
+                        productionsCollection: collect($done_on),
+                        date_production:       $data['date_production'],
+                        pdf_filename:          $filename,
+                        superviseur:           $superviseur,
+                    )
+                );
+            }
+        }
+
         // return response()->json([
         //     'success'    => 'Golden Stock vous remercie pour le travail de ce jour',
         //     'production' => $done_on,
@@ -146,12 +180,32 @@ class ProductionJournaliereController extends Controller
     //     return $filename;
     // }
 
-    public function generate_pdf(string $day): string
+    public function generate_pdf(string $date): string
     {
-        $productions = ProductionJournaliere::with('type.mouvements.matiere')
-            ->where('user_id', Auth::id())
-            ->where('date_production', $day)
-            ->get();
+        // $productions = ProductionJournaliere::with('type.mouvements.matiere')
+        //     ->where('user_id', Auth::id())
+        //     ->whereDate('date_production', $day)
+        //     ->get();
+
+        $productions = ProductionJournaliere::with([
+            'type.mouvements' => function ($query) use ($date) {
+                $query->whereDate('created_at', $date);
+            },
+            'type.mouvements.matiere'
+        ])
+        ->where('user_id', Auth::id())
+        ->whereDate('date_production', $date)
+        ->get();
+
+        
+
+        // $mouvements = MouvementStock::whereDate('created_at', '2026-04-14')->get();
+        // // dd($mouvements->count(), $mouvements->pluck('id'));
+
+        // return response()->json([
+        //     'mouvements' => $mouvements,
+        //     'productions' => $productions
+        // ]);
 
         $filename = 'rapport_production_' . now()->format('Y-m-d_H-i-s') . '_' . Auth::id() . '.pdf';
 
@@ -161,7 +215,7 @@ class ProductionJournaliereController extends Controller
         $pdf = Pdf::loadView('rapport', [
             'productions'    => $productions,
             'generate_date'  => now()->format('d/m/Y H:i'),
-            'date_production' => $day,
+            'date_production' => $date,
         ])->setOptions([
             'defaultFont'          => 'DejaVu Sans',
             'isRemoteEnabled'      => true,

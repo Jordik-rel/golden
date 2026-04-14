@@ -534,6 +534,7 @@
 
         @foreach($productions as $production)
             @php
+               
                 $sorties = $production->type->mouvements->where('type_mouvement', 'sortie');
                 $totalGlobal += $production->quantite;
                 $sectionNum++;
@@ -571,7 +572,7 @@
                             @foreach($sorties as $i => $mouvement)
                             <tr>
                                 <td class="idx">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</td>
-                                <td>{{ $mouvement->matiere->nom }}</td>
+                                <td>{{ $mouvement->matiere->libelle_matiere }}</td>
                                 <td class="unit">{{ $mouvement->matiere->unite }}</td>
                                 <td class="qty">{{ number_format($mouvement->quantite, 2, ',', ' ') }}</td>
                             </tr>
@@ -602,7 +603,7 @@
                 <td class="kpi-cell">
                     <div class="kpi-label">Avec mouvements de sortie</div>
                     <div class="kpi-value">
-                        {{ $productions->filter(fn($p) => $p->type->mouvements->where('type_mouvement','sortie')->isNotEmpty())->count() }}
+                        {{ $productions->sum(fn($p) => $p->type->mouvements->where('type_mouvement','sortie')->count()) }}
                     </div>
                     <div class="kpi-unit">productions actives</div>
                 </td>
