@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Models\TypeProduction;
 use App\Http\Requests\ProductionJournaliereRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 use function Symfony\Component\Clock\now;
 
@@ -82,10 +83,15 @@ class ProductionJournaliereController extends Controller
 
         $filename = $this->generate_pdf($data['date_production']);
 
+        // return response()->json([
+        //     'success'    => 'Golden Stock vous remercie pour le travail de ce jour',
+        //     'production' => $done_on,
+        //     'pdf_url'    => asset('storage/rapports/' . $filename),
+        // ]);
         return response()->json([
             'success'    => 'Golden Stock vous remercie pour le travail de ce jour',
             'production' => $done_on,
-            'pdf_url'    => asset('storage/rapports/' . $filename),
+            'pdf_url'    => Storage::disk('public')->url('rapports/' . $filename),
         ]);
     }
 
@@ -111,6 +117,35 @@ class ProductionJournaliereController extends Controller
     //     return $filename;
     // }
 
+    // public function generate_pdf(string $day): string
+    // {
+    //     $productions = ProductionJournaliere::with('type.mouvements.matiere')
+    //         ->where('user_id', Auth::id())
+    //         ->where('date_production', $day)
+    //         ->get();
+
+    //     $filename = 'rapport_production_' . now()->format('Y-m-d_H-i-s') . '_' . Auth::id() . '.pdf';
+    //     $directory = storage_path('app/public/rapports');
+
+    //      if (!file_exists($directory)) {
+    //         mkdir($directory, 0755, true);
+    //     }
+
+    //     $pdf = Pdf::loadView('rapport', [
+    //         'productions'    => $productions,
+    //         'generate_date'  => now()->format('d/m/Y H:i'),
+    //         'date_production' => $day,
+    //     ])->setOptions([
+    //         'defaultFont'          => 'DejaVu Sans',
+    //         'isRemoteEnabled'      => true,
+    //         'isHtml5ParserEnabled' => true,
+    //     ]);
+
+    //     $pdf->save(storage_path('app/public/rapports/' . $filename));
+
+    //     return $filename;
+    // }
+
     public function generate_pdf(string $day): string
     {
         $productions = ProductionJournaliere::with('type.mouvements.matiere')
@@ -119,6 +154,9 @@ class ProductionJournaliereController extends Controller
             ->get();
 
         $filename = 'rapport_production_' . now()->format('Y-m-d_H-i-s') . '_' . Auth::id() . '.pdf';
+
+        // Crée le dossier si absent, ne fait rien s'il existe déjà
+        Storage::disk('public')->makeDirectory('rapports');
 
         $pdf = Pdf::loadView('rapport', [
             'productions'    => $productions,
@@ -130,7 +168,8 @@ class ProductionJournaliereController extends Controller
             'isHtml5ParserEnabled' => true,
         ]);
 
-        $pdf->save(storage_path('app/public/rapports/' . $filename));
+        // Sauvegarde dans storage/app/public/rapports/
+        $pdf->save(Storage::disk('public')->path('rapports/' . $filename));
 
         return $filename;
     }
